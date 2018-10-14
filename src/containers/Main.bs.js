@@ -2,6 +2,7 @@
 'use strict';
 
 var Block = require("bs-platform/lib/js/block.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Search$ReactTemplate = require("../components/Search.bs.js");
@@ -19,8 +20,10 @@ function make() {
           /* willUnmount */component[/* willUnmount */6],
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
-          /* render */(function () {
-              return React.createElement("div", undefined, ReasonReact.element(undefined, undefined, Search$ReactTemplate.make(/* array */[])));
+          /* render */(function (self) {
+              return React.createElement("div", undefined, ReasonReact.element(undefined, undefined, Search$ReactTemplate.make((function (searchStr) {
+                                    return Curry._1(self[/* send */3], /* Search */[searchStr]);
+                                  }), /* array */[])));
             }),
           /* initialState */(function () {
               return /* record */[/* stocks : array */[]];
