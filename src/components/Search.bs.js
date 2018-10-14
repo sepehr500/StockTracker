@@ -8,7 +8,7 @@ var ReasonReact = require("reason-react/src/ReasonReact.js");
 
 var component = ReasonReact.reducerComponent("Search");
 
-function make() {
+function make(onSubmit, _) {
   return /* record */[
           /* debugName */component[/* debugName */0],
           /* reactClassInternal */component[/* reactClassInternal */1],
@@ -20,7 +20,11 @@ function make() {
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
           /* render */(function (self) {
-              return React.createElement("div", undefined, React.createElement("input", {
+              return React.createElement("div", undefined, React.createElement("button", {
+                              onClick: (function () {
+                                  return Curry._1(onSubmit, self[/* state */1][/* inputText */0]);
+                                })
+                            }, "Search"), React.createElement("input", {
                               value: self[/* state */1][/* inputText */0],
                               onChange: (function ($$event) {
                                   return Curry._1(self[/* send */3], /* Change */[$$event.target.value]);
@@ -31,8 +35,11 @@ function make() {
               return /* record */[/* inputText */""];
             }),
           /* retainedProps */component[/* retainedProps */11],
-          /* reducer */(function (_, state) {
-              return /* Update */Block.__(0, [state]);
+          /* reducer */(function (action) {
+              var text = action[0];
+              return (function () {
+                  return /* Update */Block.__(0, [/* record */[/* inputText */text]]);
+                });
             }),
           /* jsElementWrapped */component[/* jsElementWrapped */13]
         ];

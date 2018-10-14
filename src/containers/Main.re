@@ -4,11 +4,12 @@ type stock = {
   currentPrice: float
 };
 
+
 type state = {
   stocks: array(stock)
 };
 
-type action = None
+type action = Search(string)
 
 
 let component = ReasonReact.reducerComponent("Main");
@@ -19,12 +20,15 @@ let make = (_children) => {
 
   initialState: () => {stocks: [||]},
 
-  reducer: (_action: action, state: state) => ReasonReact.Update(state),
-
-
-  render: _self => {
+  reducer: (action: action, state: state) => 
+    switch(action){
+      | Search(text) => ReasonReact.Update(state)
+    },
+  render: self => {
     <div>
-        <Search />
+        <Search onSubmit=(
+          searchStr => self.send(Search(searchStr))
+        )/>
     </div>;
   },
 };
