@@ -5,22 +5,28 @@ var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
+var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Search$ReactTemplate = require("../components/Search.bs.js");
 
 var component = ReasonReact.reducerComponent("Main");
 
-function dogs(json) {
-  var __x = Json_decode.field("message", (function (param) {
-          return Json_decode.array(Json_decode.string, param);
-        }), json);
-  return Belt_Array.map(__x, (function (dog) {
-                return dog;
-              }));
+function company(json) {
+  return /* record */[/* symbol */Json_decode.field("symbol", Json_decode.string, json)];
 }
 
-var Decode = /* module */[/* dogs */dogs];
+function stockJson(json) {
+  return /* record */[
+          /* price */Json_decode.field("price", Json_decode.$$float, json),
+          /* company */Json_decode.field("company", company, json)
+        ];
+}
+
+var Decode = /* module */[
+  /* company */company,
+  /* stockJson */stockJson
+];
 
 function make() {
   return /* record */[
@@ -34,9 +40,12 @@ function make() {
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
           /* render */(function (self) {
+              var __x = self[/* state */1][/* stocks */0];
               return React.createElement("div", undefined, ReasonReact.element(undefined, undefined, Search$ReactTemplate.make((function (searchStr) {
                                     return Curry._1(self[/* send */3], /* Search */Block.__(0, [searchStr]));
-                                  }), /* array */[])));
+                                  }), /* array */[])), Belt_Array.map(__x, (function (x) {
+                                return React.createElement("div", undefined, Pervasives.string_of_float(x[/* price */0]));
+                              })));
             }),
           /* initialState */(function () {
               return /* record */[/* stocks : array */[]];
@@ -48,15 +57,11 @@ function make() {
               } else {
                 var text = action[0];
                 return /* SideEffects */Block.__(1, [(function (self) {
-                              fetch("https://api.iextrading.com/1.0/stock/market/batch?symbols=aapl&types=price,company").then((function (prim) {
-                                        return prim.text();
-                                      })).then((function () {
-                                      return Promise.resolve(Curry._1(self[/* send */3], /* AddStock */Block.__(1, [/* record */[
-                                                          /* stockSymbol */text,
-                                                          /* stockName */"",
-                                                          /* initalPrice */5.0,
-                                                          /* currentPrice */1.0
-                                                        ]])));
+                              fetch("https://api.iextrading.com/1.0/stock/" + (text + "/batch?types=price,company")).then((function (prim) {
+                                        return prim.json();
+                                      })).then((function (json) {
+                                      var stock = stockJson(json);
+                                      return Promise.resolve(Curry._1(self[/* send */3], /* AddStock */Block.__(1, [stock])));
                                     }));
                               return /* () */0;
                             })]);
