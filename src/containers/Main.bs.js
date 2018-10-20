@@ -5,10 +5,10 @@ var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
-var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Search$ReactTemplate = require("../components/Search.bs.js");
+var StockCard$ReactTemplate = require("../components/StockCard.bs.js");
 
 var component = ReasonReact.reducerComponent("Main");
 
@@ -28,6 +28,10 @@ var Decode = /* module */[
   /* stockJson */stockJson
 ];
 
+function buildUrl(text) {
+  return "https://api.iextrading.com/1.0/stock/" + (text + "/batch?types=price,company");
+}
+
 function make() {
   return /* record */[
           /* debugName */component[/* debugName */0],
@@ -40,11 +44,10 @@ function make() {
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
           /* render */(function (self) {
-              var __x = self[/* state */1][/* stocks */0];
               return React.createElement("div", undefined, ReasonReact.element(undefined, undefined, Search$ReactTemplate.make((function (searchStr) {
                                     return Curry._1(self[/* send */3], /* Search */Block.__(0, [searchStr]));
-                                  }), /* array */[])), Belt_Array.map(__x, (function (x) {
-                                return React.createElement("div", undefined, Pervasives.string_of_float(x[/* price */0]));
+                                  }), /* array */[])), Belt_Array.map(self[/* state */1][/* stocks */0], (function (x) {
+                                return ReasonReact.element(undefined, undefined, StockCard$ReactTemplate.make(x[/* price */0], x[/* company */1], /* array */[]));
                               })));
             }),
           /* initialState */(function () {
@@ -57,7 +60,7 @@ function make() {
               } else {
                 var text = action[0];
                 return /* SideEffects */Block.__(1, [(function (self) {
-                              fetch("https://api.iextrading.com/1.0/stock/" + (text + "/batch?types=price,company")).then((function (prim) {
+                              fetch(buildUrl(text)).then((function (prim) {
                                         return prim.json();
                                       })).then((function (json) {
                                       var stock = stockJson(json);
@@ -73,5 +76,6 @@ function make() {
 
 exports.component = component;
 exports.Decode = Decode;
+exports.buildUrl = buildUrl;
 exports.make = make;
 /* component Not a pure module */
