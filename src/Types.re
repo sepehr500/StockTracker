@@ -1,7 +1,11 @@
-type company = {symbol: string};
+type company = {
+  symbol: string,
+  name: string,
+ };
 
 type stock = {
-  price: float,
-  company: company
+  company: company,
+  initalPrice: float,
+  currentPrice: float
 }
 
