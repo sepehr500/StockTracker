@@ -7,33 +7,30 @@ open Belt;
      currentPrice: float
    }; */
 
-type company = {symbol: string};
 
-type stock = {
-  price: float,
-  company,
-};
-
-type state = {stocks: array(stock)};
+type state = {stocks: array(Types.stock)};
 
 type action =
   | Search(string)
-  | AddStock(stock);
+  | AddStock(Types.stock);
 
 let component = ReasonReact.reducerComponent("Main");
 
 /* TODO MAKE JSON DECODE CORRECTLY */
 module Decode = {
   open Json.Decode;
-  let company = json: company => {
+  let company = json: Types.company => {
     symbol: json |> field("symbol", Json.Decode.string),
   };
 
-  let stockJson = json: stock => {
+  let stockJson = json: Types.stock => {
     price: json |> field("price", Json.Decode.float),
     company: json |> field("company", company),
   };
 };
+
+let buildUrl = (text) => "https://api.iextrading.com/1.0/stock/" ++ text ++"/batch?types=price,company"
+
 
 let make = _children => {
   ...component,
@@ -47,14 +44,15 @@ let make = _children => {
         (
           self =>
             Js.Promise.(
-              Fetch.fetch(
-                "https://api.iextrading.com/1.0/stock/" ++ text ++"/batch?types=price,company",
-              )
-              |> then_(Fetch.Response.json)
+              text 
+              |> buildUrl
+              |> Fetch.fetch
+              |> then_(Fetch.Response.json) 
               |> then_(json =>
                    json
                    |> Decode.stockJson
-                   |> (stock => self.send(AddStock(stock)))
+                   |> stock => AddStock(stock)
+                   |> self.send
                    |> resolve
                  )
             )
@@ -69,9 +67,8 @@ let make = _children => {
       <Search onSubmit={searchStr => self.send(Search(searchStr))} />
       {
           self.state.stocks 
-          |> Array.map(_, x => 
-            <div> { x.price |> string_of_float |> ReasonReact.string} </div>) 
-          |> ReasonReact.array
+          -> Array.map(x => <StockCard company=x.company price=x.price />)
+          -> ReasonReact.array
       }
     </div>,
 };
