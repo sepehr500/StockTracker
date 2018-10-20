@@ -8,23 +8,26 @@ open Belt;
    }; */
 
 
+
 type state = {stocks: array(Types.stock)};
 
 type action =
   | Search(string)
-  | AddStock(Types.stock);
+  | AddStock(Types.stock)
+  | RemoveStock(string);
 
 let component = ReasonReact.reducerComponent("Main");
 
-/* TODO MAKE JSON DECODE CORRECTLY */
 module Decode = {
   open Json.Decode;
   let company = json: Types.company => {
     symbol: json |> field("symbol", Json.Decode.string),
+    name: json |> field("companyName", Json.Decode.string),
   };
 
   let stockJson = json: Types.stock => {
-    price: json |> field("price", Json.Decode.float),
+    currentPrice: json |> field("price", Json.Decode.float),
+    initalPrice: json |> field("price", Json.Decode.float),
     company: json |> field("company", company),
   };
 };
@@ -61,13 +64,20 @@ let make = _children => {
       )
     | AddStock(stock) =>
       ReasonReact.Update({stocks: Array.concat(state.stocks, [|stock|])})
+    | RemoveStock(symbol) => {
+      state.stocks 
+      -> ArrayLabels.to_list
+      -> ListLabels.filter((s) => s.company.symbol !== symbol)
+      |> ArrayLabels.of_list
+      |> s => ReasonReact.Update({stocks: s})
+      }
     },
   render: self =>
-    <div>
+    <div className="mw5 center">
       <Search onSubmit={searchStr => self.send(Search(searchStr))} />
       {
           self.state.stocks 
-          -> Array.map(x => <StockCard company=x.company price=x.price />)
+          -> Array.map(x => <StockCard onRemove={(s) => self.send(RemoveStock(s))} company=x.company initalPrice=x.initalPrice/>)
           -> ReasonReact.array
       }
     </div>,
